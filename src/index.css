@@ -7,6 +7,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.box{
+  height: 10px;
+  width: 10px;
+  border: 1px solid grey;
+  float: left;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
