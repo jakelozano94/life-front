@@ -1,20 +1,75 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import Canvas from './Components/Canvas'
-import logo from './logo.svg';
+import Login from './Components/Login'
+import { Button, Container, Row, Col } from 'reactstrap'
 import './App.css';
 
 function App() {
 
-  const draw = (ctx, frameCount) => {
-    ctx.clearRect(0,0, ctx.canvas.width, ctx.canvas.height)
-    ctx.fillStyle = '#000000'
-    ctx.beginPath()
-    ctx.arc(50, 100, 20*Math.sin(frameCount*0.05)**2, 0, 2*Math.PI)
-    ctx.fill()
-}
+  const [user, setUser] = useState(null);
+
+  
+  const token = localStorage.getItem("token")
+  
+ 
+  const logInHandler = (userObj = null) =>{
+    console.log(token)
+    if (token == "undefined" || token == null){
+        if(userObj){
+          fetch("http://localhost:3000/api/v1/login", {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              accept: "application/json"
+            },
+            body: JSON.stringify({ user: userObj })
+          })
+          .then(r => r.json())
+          .then(data => {
+            localStorage.setItem("token", data.jwt)
+            setUser(data.user)
+            console.log(data.user)
+          })
+        }
+    }else{
+      fetch("http://localhost:3000/api/v1/profile", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}`}
+      })
+      .then(r => r.json())
+      .then(data => setUser(data))
+      .then(() => console.log("logged in as:", {user}))
+    }
+  }
+
+  useEffect(()=>{
+    logInHandler()
+  },[])
+
+  let handleLogout = () => {
+        localStorage.removeItem("token")
+        setUser(null)
+    }
+
+
+
+
 
   return (
-    <Canvas draw={draw}/>
+    <div height={5000} width={5000}>
+    <Container flex fullHeight flexCol justifyContent="center"    >
+     
+      <Row className="justify-content-md-center" flexCol>
+      <Col xs="8" className="bg-dark">
+        <Canvas user={user}/>
+      </Col>
+      <Col>
+        <Login user={user} handleLogout={handleLogout} login={logInHandler} />
+      </Col>
+      </Row>
+  
+    </Container>
+    </div>
   );
 }
 

@@ -16,6 +16,24 @@ body {
   cursor: pointer;
 }
 
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #FFCC00;
+}
+
+#canvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#game-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
