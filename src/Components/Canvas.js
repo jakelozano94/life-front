@@ -1,7 +1,8 @@
 import React from 'react'
 import { isDOMComponent } from 'react-dom/test-utils'
 import * as tf from '@tensorflow/tfjs'
-import { Button, ButtonGroup, Container, Row, Col } from 'reactstrap'
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter, ButtonGroup, Container, Row, Col } from 'reactstrap'
+import UserMaps from './UserMaps'
 
 
 
@@ -10,6 +11,8 @@ import { Button, ButtonGroup, Container, Row, Col } from 'reactstrap'
 class Canvas extends React.Component{
   
   state = {
+    canvasRef: React.createRef(),
+    modal: false,
     run: false,
     initialMap: new Array(100).fill(0),
     color: 'green',
@@ -40,6 +43,7 @@ class Canvas extends React.Component{
   }
 
   componentDidMount(){
+    console.log(this.state.canvasRef)
     let newArray = new Array(625).fill(0)
     this.setState({gameMap: newArray})
 
@@ -74,6 +78,11 @@ class Canvas extends React.Component{
     this.setState({gameMap: this.state.initialMap})
   }
 
+  toggle = () => {
+    this.setState({modal: !this.state.modal})
+  }
+
+
   runGame = () => {
     
     let input = tf.tensor3d(this.state.gameMap, [25, 25, 1])
@@ -90,7 +99,7 @@ class Canvas extends React.Component{
 
     intervalHandler = () => {
       if (this.state.run){
-        this.intervalId = setInterval(this.runGame, 1000)
+        this.intervalId = setInterval(this.runGame, 500)
       }else{
         clearInterval(this.intervalId)
       }
@@ -106,14 +115,13 @@ class Canvas extends React.Component{
   //   this.updateCanvas()
   //   requestAnimationFrame(drawGame)
   // }
-  
-  
-  render(){
-  
-  let drawGame = () => {
-    const ctx = this.refs.canvas.getContext('2d')
+  drawGame = () => {
+
+    // this.setState({canvasRef: React.createRef})
+    const preCtx = this.state.canvasRef.current
+    if(preCtx==null) { return; }
+    const ctx = this.state.canvasRef.current.getContext('2d')
     ctx.font = "bold 10pt sans-serif"
-    if(ctx==null) { return; }
     
     for(var y = 0; y < this.state.mapH; ++y)
     {
@@ -140,27 +148,31 @@ class Canvas extends React.Component{
         ctx.fillStyle = "#ff0000";
                       ctx.strokeStyle="black"
         
-        requestAnimationFrame(drawGame);
+        requestAnimationFrame(this.drawGame);
       }
 
-      requestAnimationFrame(drawGame)
       
+      
+      
+      render(){  
+
+        requestAnimationFrame(this.drawGame)
+ 
 
     return (
+
       <>
-        <Row className="justify-content-md-center">
-          
-            <canvas id="canvas" onClick = {this.clickHandler} ref="canvas" width="250" height="250"/>
-        
-        </Row>
-        <Row className="justify-content-md-center">
+        <Modal isOpen={this.state.modal} toggle={this.toggle}>
+           <UserMaps user = {this.props.user} />
+        </Modal>
+            <canvas id="canvas" onClick = {this.clickHandler} ref={this.state.canvasRef} width="250" height="250"/>
             <ButtonGroup id="game-buttons">
               <Button outline color= "info"   onClick={this.runToggle}>{this.state.run? "Stop" : "Start"}</Button>
               <Button outline color= "info"  onClick={this.resetHandler}>Reset</Button>
               <Button outline color= "info" style={{display: this.props.user == undefined ? 'none' : 'block'}} onClick={this.saveInitial}>Save</Button>
-              <Button outline color= "info" style={{display: this.props.user == undefined ? 'none' : 'block'}} onClick={this.showMaps}>Saved Maps</Button>
+              <Button outline color= "info" style={{display: this.props.user == undefined ? 'none' : 'block'}} onClick={this.toggle}>Saved Maps</Button>
             </ButtonGroup>
-        </Row>
+        
       </>
     )
   }

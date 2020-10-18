@@ -28,7 +28,10 @@
   color: #61dafb;
 }
 
-
+.App-container{
+  width: 100vw;
+  height: 100vh;
+}
 
 #canvas_cont {
   margin: auto;

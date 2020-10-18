@@ -56,19 +56,9 @@ function App() {
 
 
   return (
-    <div height={5000} width={5000}>
-    <Container flex fullHeight flexCol justifyContent="center"    >
-     
-      <Row className="justify-content-md-center" flexCol>
-      <Col xs="8" className="bg-dark">
+    <div>
         <Canvas user={user}/>
-      </Col>
-      <Col>
         <Login user={user} handleLogout={handleLogout} login={logInHandler} />
-      </Col>
-      </Row>
-  
-    </Container>
     </div>
   );
 }
