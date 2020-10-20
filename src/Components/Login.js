@@ -36,7 +36,6 @@ const Login = (props) => {
             props.login(userObj)
           })
           .catch(function (error) {
-              console.log("here")
             props.login(userObj)
             setpopOpen(true)
           })
@@ -46,7 +45,7 @@ const Login = (props) => {
     
     
       return (
-        <div>
+        <div id="login-cont">
             {props.user != null ? 
             <Button color="danger" onClick={props.handleLogout}>Logout</Button>
             :

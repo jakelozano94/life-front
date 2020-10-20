@@ -1,9 +1,13 @@
+import "react-input-range/lib/css/index.css";
 import React from 'react'
+import ReactDom from 'react-dom'
 import { isDOMComponent } from 'react-dom/test-utils'
 import * as tf from '@tensorflow/tfjs'
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter, ButtonGroup, Container, Row, Col } from 'reactstrap'
 import UserMaps from './UserMaps'
-
+import MathModal from './Math'
+import Explain from './Explain'
+import InputRange from 'react-input-range'
 
 
 
@@ -11,17 +15,22 @@ import UserMaps from './UserMaps'
 class Canvas extends React.Component{
   
   state = {
+    time: 500,
+    intervalId: null,
     canvasRef: React.createRef(),
     modal: false,
+    mathModal: false,
+    explainModal: false,
     run: false,
-    initialMap: new Array(100).fill(0),
+    initialMap: new Array(625).fill(0),
     color: 'green',
-    tileW: 10,
-    tileH: 10,
-    mapW: 25,
-    mapH: 25,
-    gameMap: new Array(625).fill(0)
-    
+    tileW: 15,
+    tileH: 15,
+    mapDim: 50,
+    size: 0,
+    gameMap: new Array(625).fill(0),
+    offColor: "#808080",
+    onColor: "#FFFF00"
   }
 
   saveInitial = () => {
@@ -39,14 +48,14 @@ class Canvas extends React.Component{
   }
 
   showMaps = () => {
-    this.setState({gameMap: this.props.user.user? this.props.user.user.maps[2].position : this.props.user.maps[2].position})
+    this.setState({gameMap: this.props.user.maps[2].position})
   }
 
   componentDidMount(){
     console.log(this.state.canvasRef)
-    let newArray = new Array(625).fill(0)
-    this.setState({gameMap: newArray})
-
+    let length = this.state.mapDim*this.state.mapDim
+    let newArray = new Array(length).fill(0)
+    this.setState({gameMap: newArray, size: this.state.mapDim})
   }
   
   clickHandler = (e) => {
@@ -62,7 +71,7 @@ class Canvas extends React.Component{
     var mouseY=e.clientY-offsetY
     var column = parseInt(mouseX/this.state.tileW)
     var row = parseInt(mouseY/this.state.tileH)
-    let index = (this.state.mapW)*(row) + column
+    let index = (this.state.mapDim)*(row) + column
     let newArray = this.state.gameMap
     newArray[index] == 0 ? newArray[index] = 1 : newArray[index] = 0
     this.setState({initialMap: newArray})
@@ -77,15 +86,64 @@ class Canvas extends React.Component{
     clearInterval()
     this.setState({gameMap: this.state.initialMap})
   }
+  
+  clearBoard = () => {
+    let size = this.state.mapDim * this.state.mapDim
+    this.setState({gameMap: new Array(size).fill(0)})
+  }
+
+  toggleExplain = () => {
+    this.setState({explainModal: !this.state.explainModal}, console.log(this.state.explainModal))
+  }
+
+  toggleMath = () => {
+    this.setState({mathModal: !this.state.mathModal}, console.log(this.state.mathModal))
+  }
 
   toggle = () => {
     this.setState({modal: !this.state.modal})
   }
 
+  handleBoardUpdate = () => {
+    this.setState({mapDim: this.state.size, gameMap: new Array(this.state.size * this.state.size).fill(0)})
+  }
+
+  changeMap = (gameMap) => {
+    let gameMapDim = Math.sqrt(gameMap.length)
+    let oldGameMapDim = Math.sqrt(this.state.gameMap.length)
+    let lenDiff = oldGameMapDim-gameMapDim
+    if (lenDiff > 0){
+    let pad = Math.floor(lenDiff/2)
+    let gameMap2d = tf.tensor4d(gameMap, [1, gameMapDim, gameMapDim, 1])
+    if (pad%2){
+      let args = {
+          padding: [pad, pad],
+          inputShape: [1, gameMapDim, gameMapDim, 1]
+      }
+      let y = tf.layers.zeroPadding2d(args)
+      let finalMap = y.apply(gameMap2d).arraySync().flat(3)
+      this.setState({gameMap: finalMap})
+    }else{
+      let extraPad = pad + 1
+      let args = {
+         padding: [[pad, extraPad],[pad, extraPad]],
+         inputShape: [1, gameMapDim, gameMapDim, 1]
+       }
+       let y = tf.layers.zeroPadding2d(args)
+       let finalMap = y.apply(gameMap2d).arraySync().flat(3)
+       console.log(finalMap)
+       this.setState({gameMap: finalMap})
+    }}else{
+      this.setState({gameMap: gameMap, mapDim: gameMapDim})
+    }
+    this.toggle()
+  }
+
 
   runGame = () => {
     
-    let input = tf.tensor3d(this.state.gameMap, [25, 25, 1])
+    console.log("run")
+    let input = tf.tensor3d(this.state.gameMap, [this.state.mapDim, this.state.mapDim, 1])
     let filter =  tf.tensor4d([1, 1, 1, 1, .5, 1, 1, 1, 1], [3, 3, 1, 1])
     let strides = [1, 1, 1, 1]
     let padding = 'same'
@@ -97,11 +155,12 @@ class Canvas extends React.Component{
     this.setState({gameMap: final})
     }
 
+
     intervalHandler = () => {
-      if (this.state.run){
-        this.intervalId = setInterval(this.runGame, 500)
-      }else{
-        clearInterval(this.intervalId)
+      clearInterval(this.state.intervalId)
+      if (this.state.run ){
+        this.intervalId = setInterval(this.runGame, this.state.time)
+        this.setState({intervalId: this.intervalId})
       }
     }
 
@@ -116,6 +175,7 @@ class Canvas extends React.Component{
   //   requestAnimationFrame(drawGame)
   // }
   drawGame = () => {
+    console.log("draw")
 
     // this.setState({canvasRef: React.createRef})
     const preCtx = this.state.canvasRef.current
@@ -123,17 +183,17 @@ class Canvas extends React.Component{
     const ctx = this.state.canvasRef.current.getContext('2d')
     ctx.font = "bold 10pt sans-serif"
     
-    for(var y = 0; y < this.state.mapH; ++y)
+    for(var y = 0; y < this.state.mapDim; ++y)
     {
-      for(var x = 0; x < this.state.mapW; ++x)
+      for(var x = 0; x < this.state.mapDim; ++x)
       {
-        switch(this.state.gameMap[((y*this.state.mapW)+x)])
+        switch(this.state.gameMap[((y*this.state.mapDim)+x)])
         {
           case 0:
-            ctx.fillStyle = "gray";
+            ctx.fillStyle = this.state.offColor;
             break;
             default:
-              ctx.fillStyle = "yellow";
+              ctx.fillStyle = this.state.onColor;
 
             }
             
@@ -146,34 +206,80 @@ class Canvas extends React.Component{
         }
         
         ctx.fillStyle = "#ff0000";
-                      ctx.strokeStyle="black"
+        ctx.strokeStyle="black"
         
-        requestAnimationFrame(this.drawGame);
+        // requestAnimationFrame(this.drawGame);
       }
 
       
       
       
-      render(){  
+      render(){ 
+         
 
         requestAnimationFrame(this.drawGame)
  
 
     return (
-
       <>
+      <div id="game_board">
         <Modal isOpen={this.state.modal} toggle={this.toggle}>
-           <UserMaps user = {this.props.user} />
+           <UserMaps changeMap= {this.changeMap} user = {this.props.user} />
         </Modal>
-            <canvas id="canvas" onClick = {this.clickHandler} ref={this.state.canvasRef} width="250" height="250"/>
-            <ButtonGroup id="game-buttons">
-              <Button outline color= "info"   onClick={this.runToggle}>{this.state.run? "Stop" : "Start"}</Button>
-              <Button outline color= "info"  onClick={this.resetHandler}>Reset</Button>
-              <Button outline color= "info" style={{display: this.props.user == undefined ? 'none' : 'block'}} onClick={this.saveInitial}>Save</Button>
-              <Button outline color= "info" style={{display: this.props.user == undefined ? 'none' : 'block'}} onClick={this.toggle}>Saved Maps</Button>
-            </ButtonGroup>
-        
-      </>
+        <Modal size="lg" centered = "true" isOpen={this.state.explainModal} toggle={this.toggleExplain}>
+            <Explain/>
+        </Modal>
+        <Modal isOpen={this.state.mathModal} toggle={this.toggleMath}>
+          <MathModal/>
+        </Modal>
+
+        <ButtonGroup vertical>
+          <Button onClick={this.toggleMath}>Under the Hood</Button>
+          <Button onClick ={this.toggleExplain}>Whats the Game of Life?</Button>
+        </ButtonGroup>
+        <canvas id="main_canvas" onClick = {this.clickHandler} ref={this.state.canvasRef} width={this.state.mapDim*this.state.tileW} height={this.state.tileH*this.state.mapDim}/>
+        <ButtonGroup vertical id="game-buttons">
+          <Button outline color= "info"   onClick={this.runToggle}>{this.state.run ? "Stop" : "Start"}</Button>
+          <Button outline color= "info"  onClick={this.resetHandler}>Reset</Button>
+          <Button outline color= "info"   onClick={this.clearBoard}>Clear</Button>
+          <Button outline color= "info" style={{display: this.props.user == undefined ? 'none' : 'block'}} onClick={this.saveInitial}>Save</Button>
+          <Button outline color= "info" style={{display: this.props.user == undefined ? 'none' : 'block'}} onClick={this.toggle}>Saved Maps</Button>
+        </ButtonGroup>
+      <div id="range-cont">
+        <div>
+          <label id="slider-on-label">ON</label>
+          <label id="slider-off-label">OFF</label>
+        </div>
+        <div id="color-cont">
+          <input
+           onChange={(e)=>this.setState({onColor: e.target.value})}
+           type="color" value={this.state.onColor} id="on-color"/>
+          <input
+           onChange={(e)=>this.setState({offColor: e.target.value})}
+          type="color" value={this.state.offColor} id="off-color"/>
+        </div>
+    
+        <label id="slider-label">Board Size</label>
+          <InputRange
+            formatLabel={value => `${value}`}
+            minValue={20}
+            maxValue={50}
+            value={this.state.size}
+            onChange={size => this.setState({ size })}
+            onChangeComplete={this.handleBoardUpdate} />
+
+        <label id="slider-label">Interval</label>
+        <InputRange
+          formatLabel={value => `${value}`}
+          minValue={10}
+          maxValue={1000}
+          value={this.state.time}
+          onChange={time => this.setState({ time }, this.intervalHandler)}
+          />
+      </div>
+      </div>
+
+        </>
     )
   }
 }

@@ -7,15 +7,40 @@ state = {
     canvasRef2: React.createRef(),
     modal: false,
     run: false,
-    initialMap: new Array(100).fill(0),
     color: 'green',
     tileW: 10,
     tileH: 10,
-    mapW: 25,
+    mapDim: 25,
     mapH: 25,
-    gameMap: this.props.user.user.maps[2].position
-    
+    gameMap: new Array(2500).fill(0),
+    counter: 0
     }
+
+    prevMap = () => {
+      if (this.state.counter === 0){
+        let allMaps = this.props.user.maps
+        const newCounter = allMaps.length-1
+        this.setState({counter: newCounter, gameMap: this.props.user.maps[newCounter].position}, console.log(this.state.counter))
+      }
+      else{
+  
+        this.setState({counter: --this.state.counter}, this.setState({gameMap: this.props.user.maps[this.state.counter].position}))
+      }
+    }
+
+    nextMap = () => {
+      if (this.state.counter === this.props.user.maps.length - 1){
+        this.setState({counter: 0, gameMap: this.props.user.maps[0].position}, console.log(this.state.counter))
+      }
+      else{
+        this.setState({counter: ++this.state.counter}, this.setState({gameMap: this.props.user.maps[this.state.counter].position}))
+      }
+    }
+
+    mapSelect = () => {
+      this.props.changeMap(this.state.gameMap)
+    }
+
 
     drawGame = () => {
         const preCtx = this.state.canvasRef2
@@ -24,11 +49,11 @@ state = {
         const ctx = this.state.canvasRef2.current.getContext('2d')
         ctx.font = "bold 10pt sans-serif"
         
-        for(var y = 0; y < this.state.mapH; ++y)
+        for(var y = 0; y < this.state.mapDim; ++y)
         {
-          for(var x = 0; x < this.state.mapW; ++x)
+          for(var x = 0; x < this.state.mapDim; ++x)
           {
-            switch(this.state.gameMap[((y*this.state.mapW)+x)])
+            switch(this.state.gameMap[((y*this.state.mapDim)+x)])
             {
               case 0:
                 ctx.fillStyle = "gray";
@@ -55,8 +80,8 @@ state = {
           
           
           render(){  
-              console.log("this:", this.props.user.user.maps)
                 requestAnimationFrame(this.drawGame)
+                console.log(this.props)
      
     
         return (
@@ -64,7 +89,14 @@ state = {
             <ModalBody>
                <canvas ref={this.state.canvasRef2} width="250" height="250"/>
             </ModalBody>
-            <ModalFooter>
+            <ModalFooter id="buttons_container">
+              <div id="nav_buttons">
+                <a href="#" onClick={this.prevMap} class="previous round">&#8249;</a>
+                <a href="#" onClick={this.nextMap}class="next round">&#8250;</a>
+              </div>
+              <div id="select_container">
+                <button id="select_button" onClick={this.mapSelect}>Select</button>
+              </div>
             </ModalFooter>
             </>
       
