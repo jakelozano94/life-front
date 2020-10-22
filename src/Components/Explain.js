@@ -8,7 +8,7 @@ const items = [
       caption: 'three to one'
     },
     {
-      src: 'https://i.imgur.com/dPGl5UY.jpg',
+      src: 'https://i.imgur.com/8I4GShw.jpg',
       altText: 'Slide 2',
       caption: 'Slide 2'
     },
@@ -56,6 +56,7 @@ const items = [
     <>
    
       <Carousel
+        interval={false}
         activeIndex={activeIndex}
         next={next}
         previous={previous}

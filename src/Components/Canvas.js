@@ -91,7 +91,7 @@ class Canvas extends React.Component{
   
   clearBoard = () => {
     let size = this.state.mapDim * this.state.mapDim
-    this.setState({gameMap: new Array(size).fill(0), run: false})
+    this.setState({gameMap: new Array(size).fill(0), run: false}, this.intervalHandler)
   }
 
   toggleExplain = () => {

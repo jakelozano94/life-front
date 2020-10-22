@@ -10,7 +10,7 @@ const items = [
     key: '1'
   },
   {
-    src: require('../images/board_to_array.png'),
+    src: 'https://media1.giphy.com/media/uHaZa235y80ZIU1LGF/giphy.gif',
     key: '2'
   },
   {
