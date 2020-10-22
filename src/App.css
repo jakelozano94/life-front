@@ -1,6 +1,4 @@
 
-
-
 .App {
   text-align: center;
 }
@@ -190,7 +188,7 @@ a, #select_button{
 
 a:hover, #select_button:hover {
   transition-duration: 1s;
-  background-color: #ddd;
+  /* background-color: #ddd; */
   color: black;
 }
 
@@ -360,3 +358,5 @@ a:hover, #select_button:hover {
   outline: var(--border-size) dashed var(--color-primary);
   outline-offset: calc(var(--border-size) * -3);
 }
+
+

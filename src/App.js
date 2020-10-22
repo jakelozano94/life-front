@@ -3,6 +3,8 @@ import Canvas from './Components/Canvas'
 import Login from './Components/Login'
 import { Button, Container, Row, Col } from 'reactstrap'
 import './App.css';
+import './App.scss'
+import Social from './Components/Social'
 
 function App() {
 
@@ -56,10 +58,13 @@ function App() {
 
 
   return (
+    <>
     <div id="container">
         <Canvas user={user}/>
         <Login user={user} handleLogout={handleLogout} login={logInHandler} />
     </div>
+        <Social/>
+        </>
   );
 }
 
