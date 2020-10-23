@@ -119,17 +119,20 @@ class Canvas extends React.Component{
     let oldGameMapDim = Math.sqrt(this.state.gameMap.length)
     let lenDiff = oldGameMapDim-gameMapDim
     if (lenDiff > 0){
-    let pad = Math.floor(lenDiff/2)
-    let gameMap2d = tf.tensor4d(gameMap, [1, gameMapDim, gameMapDim, 1])
+      let pad = Math.floor(lenDiff/2)
+      let gameMap2d = tf.tensor4d(gameMap, [1, gameMapDim, gameMapDim, 1])
     if (pad%2){
+      console.log("here")
+      let extraPad = pad + 1
       let args = {
-          padding: [pad, pad],
+          padding: [[pad, extraPad],[pad, extraPad]],
           inputShape: [1, gameMapDim, gameMapDim, 1]
       }
       let y = tf.layers.zeroPadding2d(args)
       let finalMap = y.apply(gameMap2d).arraySync().flat(3)
       this.setState({gameMap: finalMap})
     }else{
+      console.log("there")
       let extraPad = pad + 1
       let args = {
          padding: [[pad, extraPad],[pad, extraPad]],
