@@ -18,7 +18,7 @@ function App() {
     console.log(token)
     if (token == "undefined" || token == null){
         if(userObj){
-          fetch("http://localhost:3000/api/v1/login", {
+          fetch("https://game-of-tensorflow.herokuapp.com/api/v1/login", {
             method: "POST",
             headers: {
               "content-type": "application/json",
