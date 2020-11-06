@@ -38,7 +38,7 @@ class Canvas extends React.Component{
   saveInitial = () => {
     const token = localStorage.getItem("token")
     let array = this.state.initialMap
-    fetch("http://localhost:3000/api/v1/maps", {
+    fetch("https://game-of-tensorflow.herokuapp.com/api/v1/maps", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,

@@ -34,7 +34,7 @@ function App() {
           })
         }
     }else{
-      fetch("http://localhost:3000/api/v1/profile", {
+      fetch("https://game-of-tensorflow.herokuapp.com/api/v1/profile", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}`}
       })

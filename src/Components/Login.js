@@ -22,7 +22,7 @@ const Login = (props) => {
 
    let signupHandler = (userObj) => {
        console.log(userObj)
-        fetch("http://localhost:3000/api/v1/users", {
+        fetch("https://game-of-tensorflow.herokuapp.com/api/v1/users", {
           method: "POST",
           headers: {
             "content-type": "application/json",
