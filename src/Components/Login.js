@@ -36,7 +36,6 @@ const Login = (props) => {
             props.login(userObj)
           })
           .catch(function (error) {
-              console.log("here")
             props.login(userObj)
             setpopOpen(true)
           })
@@ -46,14 +45,14 @@ const Login = (props) => {
     
     
       return (
-        <div>
+        <div id="login-cont">
             {props.user != null ? 
-            <Button color="danger" onClick={props.handleLogout}>Logout</Button>
+            <button id="log-button" color="danger" onClick={props.handleLogout}>Logout</button>
             :
-            <Button color="primary" onClick={() => {setModal(!modal)}}>Login</Button>
+            <button id="log-button" color="primary" onClick={() => {setModal(!modal)}}>Login</button>
             
             }
-            <Modal isOpen={modal} toggle={() => {setModal(!modal)}}>
+            <Modal className="login-modal" isOpen={modal} size ='sm' toggle={() => {setModal(!modal)}}>
                 <ModalHeader toggle={() => {setModal(!modal)}}>Please Login</ModalHeader>
                 <ModalBody>
                 <AvForm onValidSubmit={handleValidSubmit}>

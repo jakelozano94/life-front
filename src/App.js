@@ -3,6 +3,8 @@ import Canvas from './Components/Canvas'
 import Login from './Components/Login'
 import { Button, Container, Row, Col } from 'reactstrap'
 import './App.css';
+import './App.scss'
+import Social from './Components/Social'
 
 function App() {
 
@@ -37,7 +39,7 @@ function App() {
         headers: { Authorization: `Bearer ${token}`}
       })
       .then(r => r.json())
-      .then(data => setUser(data))
+      .then(data => setUser(data.user))
       .then(() => console.log("logged in as:", {user}))
     }
   }
@@ -56,10 +58,13 @@ function App() {
 
 
   return (
-    <div>
+    <>
+    <div id="container">
         <Canvas user={user}/>
         <Login user={user} handleLogout={handleLogout} login={logInHandler} />
     </div>
+        <Social/>
+        </>
   );
 }
 
